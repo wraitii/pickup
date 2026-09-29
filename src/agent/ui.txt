@@ -39,8 +39,8 @@ Songs and saving
 Chat and settings
 - Type in the chat at right; Enter sends, Shift+Enter adds a line. The chat stop button interrupts the AI response; playback has its own stop button in the top bar.
 - Try “How do I loop just the chorus?” or “How do I record a take?” for UI help.
-- Settings lets you enter an OpenRouter API key and choose the band model. The key is stored in this browser's localStorage. Never ask the user to paste a key into chat.
-- A local/driver model is also available for a separately configured local relay; the project README has setup instructions.
+- Settings starts with a provider selector: OpenRouter or Local. OpenRouter lets you enter an API key and choose the band model. The key is stored in this browser's localStorage. Never ask the user to paste a key into chat.
+- Choose the Local provider to see relay instructions: run node scripts/band.mjs serve from a local Pickup checkout, ask a local agent to connect using scripts/band.mjs, then send a chat message. Local hides the API key, model and reasoning fields. Switching back restores the previous OpenRouter model. The setup link opens the README.
 - Settings also has reasoning effort: off, low, medium (default), or high. Higher effort can take longer and cost more. Changes apply to the next message; the selector is disabled for models without reasoning support.
 - Reset chat in settings forgets the conversation while keeping the song.
 - The top bar shows AI context tokens and accumulated chat cost. Tool details in chat can be expanded; manual song edits are shared with the band on the next message.

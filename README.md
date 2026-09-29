@@ -25,7 +25,7 @@ they aren't included in the file.
 
 ## Band models
 
-Pick the model in the top bar's settings.
+Pick a provider in the top bar's settings. OpenRouter shows the API key, model and reasoning options; Local shows relay setup instructions.
 
 - **OpenRouter models:** add your OpenRouter API key in settings. The page then
   calls the model directly.
@@ -48,7 +48,7 @@ Pick the model in the top bar's settings.
    Set `PICKUP_BAND_PORT` to use another port. The app itself expects port 7878
    (`LOCAL_RELAY` in `src/agent/local.ts`).
 
-2. In the app, pick **Local** as the band model and send a message.
+2. In the app, pick **Local** as the provider in settings and send a message.
 
 3. Drive the band from a terminal:
 

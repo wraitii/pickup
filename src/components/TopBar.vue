@@ -6,7 +6,8 @@ import { MAX_TRACKS, formatClipFile } from '../song/format'
 import { library, openSong, createSong, deleteSong, exportSong, importSong } from '../song/library'
 import { start, stop, unloop } from '../music/conductor'
 import { recorder, recordings, startRecording, stopRecording, saveRecording, recName, takeBars, REC_PREFIX } from '../music/recordings'
-import { chat, transcript, bandModelOptions, resetChat } from '../agent/agent'
+import { chat, transcript, bandModelOptions, DEFAULT_BAND_MODEL, resetChat } from '../agent/agent'
+import { LOCAL_MODEL_ID } from '../agent/local'
 import { failedSampleMaps } from '../music/strudel'
 
 /** The Pages workflow points forks to their own source repository. */
@@ -19,6 +20,20 @@ const showSongs = ref(false)
 const importError = ref('')
 const songs = computed(() => Object.values(library).sort((a, b) => b.updated - a.updated))
 const when = (t: number) => new Date(t).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+
+const openRouterModels = bandModelOptions.filter((m) => m.provider === 'openrouter')
+const provider = computed({
+  get: () => settings.model === LOCAL_MODEL_ID ? 'local' : 'openrouter',
+  set: (value: string) => {
+    if (value === 'local') {
+      settings.openRouterModel = settings.model
+      settings.model = LOCAL_MODEL_ID
+    } else {
+      settings.model = openRouterModels.some((m) => m.id === settings.openRouterModel)
+        ? settings.openRouterModel : DEFAULT_BAND_MODEL
+    }
+  },
+})
 
 const model = computed(() => bandModelOptions.find((m) => m.id === settings.model))
 const ctxPct = computed(() =>
@@ -250,23 +265,46 @@ async function onImport(e: Event) {
 
     <div v-if="showSettings" class="drawer">
       <label>
-        OpenRouter API key
-        <input type="password" v-model="settings.apiKey" placeholder="sk-or-..." autocomplete="off" />
-      </label>
-      <p class="muted">Stored in this browser's localStorage only.</p>
-      <label>
-        band model (chat + tools)
-        <select v-model="settings.model">
-          <option v-for="m in bandModelOptions" :key="m.id" :value="m.id">{{ m.id }} — {{ price(m) }}</option>
+        provider
+        <select v-model="provider">
+          <option value="openrouter">OpenRouter</option>
+          <option value="local">Local</option>
         </select>
       </label>
-      <label>
-        reasoning effort
-        <select v-model="settings.reasoning" :disabled="!model?.reasoning">
-          <option v-for="level in reasoningLevels" :key="level" :value="level">{{ level }}</option>
-        </select>
-      </label>
-      <p class="muted">{{ model?.reasoning ? 'Higher effort can take longer and cost more. Applies to your next message.' : 'Reasoning effort is not available for this model.' }}</p>
+      <template v-if="provider === 'openrouter'">
+        <label>
+          OpenRouter API key
+          <input type="password" v-model="settings.apiKey" placeholder="sk-or-..." autocomplete="off" />
+        </label>
+        <p class="muted">Stored in this browser's localStorage only.</p>
+        <label>
+          band model (chat + tools)
+          <select v-model="settings.model">
+            <option v-for="m in openRouterModels" :key="m.id" :value="m.id">{{ m.id }} — {{ price(m) }}</option>
+          </select>
+        </label>
+        <label>
+          reasoning effort
+          <select v-model="settings.reasoning" :disabled="!model?.reasoning">
+            <option v-for="level in reasoningLevels" :key="level" :value="level">{{ level }}</option>
+          </select>
+        </label>
+        <p class="muted">{{ model?.reasoning ? 'Higher effort can take longer and cost more. Applies to your next message.' : 'Reasoning effort is not available for this model.' }}</p>
+      </template>
+      <div v-else class="local-help">
+        <p>Use an agent running on your computer to play the band. No OpenRouter API key needed.</p>
+        <ol>
+          <li>From your local Pickup checkout, start the relay and leave it running:
+            <code>node scripts/band.mjs serve</code>
+          </li>
+          <li>Ask your agent to connect:
+            <blockquote>Connect to Pickup using scripts/band.mjs. Wait for messages with wait, read the instructions with system, use tool to play the band, and reply with say. Keep waiting for the next message after each reply.</blockquote>
+          </li>
+          <li>Send a message in Pickup's chat to start.</li>
+        </ol>
+        <p class="muted">If your browser blocks the local connection, run <code>npm run dev</code> and open the local app.</p>
+        <p><a :href="sourceUrl + '#local-usage'" target="_blank" rel="noopener noreferrer">Local setup instructions</a> · requires Node.js 18+</p>
+      </div>
       <div class="row">
         <button title="forget the conversation but keep the song; the band gets the full song again" @click="resetChat">
           reset chat
@@ -377,6 +415,8 @@ header {
   z-index: 20;
   width: 420px;
   max-width: calc(100vw - 20px);
+  max-height: calc(100dvh - 100% - 10px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -385,6 +425,30 @@ header {
   border: 1px solid var(--border);
   border-radius: 6px;
   box-shadow: 0 8px 24px #0008;
+}
+.local-help {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+.local-help ol {
+  margin: 0;
+  padding-left: 20px;
+}
+.local-help li + li {
+  margin-top: 8px;
+}
+.local-help li > code,
+.local-help blockquote {
+  display: block;
+  margin: 6px 0 0;
+  padding: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.local-help code {
+  font-family: var(--mono);
 }
 .drawer label {
   display: flex;

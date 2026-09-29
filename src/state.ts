@@ -72,6 +72,7 @@ export const settings = reactive(
   load(SETTINGS_KEY, () => ({
     apiKey: '',
     model: 'anthropic/claude-sonnet-5.5',
+    openRouterModel: 'anthropic/claude-sonnet-5.5',
     reasoning: 'medium' as (typeof reasoningLevels)[number],
   })),
 )
