@@ -4,7 +4,9 @@ import { song, settings, reasoningLevels, ui, songMeta, clips, trackCount } from
 import { updateSong, writeFile } from '../song/fs'
 import { MAX_TRACKS, formatClipFile } from '../song/format'
 import { library, openSong, createSong, deleteSong, exportSong, importSong } from '../song/library'
-import { start, stop, unloop } from '../music/conductor'
+import { renderPattern } from '../music/render'
+import { encodeWav } from '../music/wav'
+import { start, stop, unloop, regionOf, buildRegion } from '../music/conductor'
 import { recorder, recordings, startRecording, stopRecording, saveRecording, recName, takeBars, REC_PREFIX } from '../music/recordings'
 import { chat, transcript, bandModelOptions, DEFAULT_BAND_MODEL, resetChat } from '../agent/agent'
 import { LOCAL_MODEL_ID } from '../agent/local'
@@ -18,6 +20,36 @@ const showAbout = ref(false)
 const showSettings = ref(false)
 const showSongs = ref(false)
 const importError = ref('')
+const exportingAudio = ref(false)
+const audioExportError = ref('')
+async function exportAudio() {
+  if (exportingAudio.value) return
+  exportingAudio.value = true
+  audioExportError.value = ''
+  try {
+    const region = regionOf(null, true)
+    if (!region.entries.length) throw new Error('Place an audible clip on the timeline first.')
+    const cps = songMeta.value.bpm / 240
+    const title = songMeta.value.title
+    const pattern = await buildRegion(region, 0)
+    const invalid = region.entries.find(e => ui.clipStatus[e.ref]?.error)
+    if (invalid) throw new Error(`${invalid.ref}: ${ui.clipStatus[invalid.ref]?.error}`)
+    const audio = await renderPattern(pattern, region.to, cps)
+    const url = URL.createObjectURL(encodeWav(audio.channels, audio.sampleRate))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'song'}.wav`
+    link.click()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  } catch (err) {
+    audioExportError.value = err instanceof Error ? err.message : String(err)
+    showSongs.value = true
+    showSettings.value = false
+    showAbout.value = false
+  } finally {
+    exportingAudio.value = false
+  }
+}
 const songs = computed(() => Object.values(library).sort((a, b) => b.updated - a.updated))
 const when = (t: number) => new Date(t).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
 
@@ -249,6 +281,11 @@ async function onImport(e: Event) {
           <input type="file" accept=".json,application/json" hidden @change="onImport" />
         </label>
       </div>
+      <div class="row">
+        <button :disabled="exportingAudio || chat.busy" @click="exportAudio">{{ exportingAudio ? 'rendering WAV…' : 'export WAV' }}</button>
+      </div>
+      <p class="muted">Current song · full timeline with mute/solo · stereo WAV, 44.1 kHz / 16-bit.</p>
+      <p v-if="audioExportError" class="error" role="alert">{{ audioExportError }}</p>
       <p v-if="importError" class="error">{{ importError }}</p>
       <ul class="songs">
         <li v-for="s in songs" :key="s.id" :class="{ current: s.id === song.id }">

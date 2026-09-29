@@ -19,7 +19,9 @@ source to "GitHub Actions".
 
 Songs are kept in this browser's library (**songs** in the top bar). From there
 you can open a song, start a new one, or export and import `.pickup.json` files.
-An export includes the song's clip files and any mic takes it plays
+Use **export WAV** in Songs to download the current full timeline as stereo 44.1 kHz / 16-bit audio, respecting mute/solo and including a one-second effects tail. Rendering runs locally in your browser.
+
+A JSON export includes the song's clip files and any mic takes it plays
 (`rec_*`). Built-in sounds are referenced by name and load from GitHub, so
 they aren't included in the file.
 

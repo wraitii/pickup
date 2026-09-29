@@ -27,6 +27,7 @@ async function render(events: RenderEvent[], seconds: number, cps: number, sampl
   // shortly before each bar. Scheduling everything up front puts every note's
   // nodes in the graph for the whole render, so the cost grows with
   // notes × length; this way finished notes are gone before later ones exist.
+  const errors: string[] = []
   let scheduling = 0
   const schedule = async (batch: RenderEvent[]) => {
     const s = performance.now()
@@ -35,7 +36,7 @@ async function render(events: RenderEvent[], seconds: number, cps: number, sampl
       try {
         await SD.superdough(e.value, e.t, e.duration, cps, e.t)
       } catch (err) {
-        console.warn('[render]', err)
+        errors.push(String(err))
       }
     }
     scheduling += performance.now() - s
@@ -55,13 +56,14 @@ async function render(events: RenderEvent[], seconds: number, cps: number, sampl
   }
 
   const buf = await ctx.startRendering()
+  if (errors.length) throw new Error(`Could not render audio: ${errors[0]}`)
   const t2 = performance.now()
   const l = buf.getChannelData(0)
   const r = buf.getChannelData(1)
   const mono = new Float32Array(l.length)
   for (let i = 0; i < l.length; i++) mono[i] = (l[i] + r[i]) / 2
   const timings: RenderTimings = { setup: t1 - t0, schedule: scheduling, audio: t2 - t1 - scheduling }
-  return { samples: mono, timings }
+  return { samples: mono, channels: [l, r], timings }
 }
 
 ;(window as any).pickupRender = render

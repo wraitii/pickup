@@ -27,7 +27,7 @@ function loadFrame(): Promise<HTMLIFrameElement> {
 // one render at a time (they're CPU-heavy)
 let queue: Promise<unknown> = Promise.resolve()
 
-export type Rendered = { samples: Float32Array; sampleRate: number; notes: number; timings: RenderTimings & { frame: number } }
+export type Rendered = { samples: Float32Array; channels: Float32Array[]; sampleRate: number; notes: number; timings: RenderTimings & { frame: number } }
 
 /** Render `bars` cycles of `pattern` at `cps`. Returns a mono mix, with where the time went (ms). */
 export function renderPattern(pattern: any, bars: number, cps: number): Promise<Rendered> {
@@ -46,8 +46,8 @@ export function renderPattern(pattern: any, bars: number, cps: number): Promise<
     try {
       const render = (frame.contentWindow as any)?.pickupRender
       if (!render) throw new Error('renderer failed to start')
-      const { samples, timings } = await render(events, bars / cps + TAIL, cps, SAMPLE_RATE, sampleMaps)
-      return { samples, sampleRate: SAMPLE_RATE, notes: events.length, timings: { ...timings, frame: loaded } }
+      const { samples, channels, timings } = await render(events, bars / cps + TAIL, cps, SAMPLE_RATE, sampleMaps)
+      return { samples, channels, sampleRate: SAMPLE_RATE, notes: events.length, timings: { ...timings, frame: loaded } }
     } finally {
       frame.remove()
     }

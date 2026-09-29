@@ -3,6 +3,7 @@
 // play them with s("rec_<name>"). They belong to the browser, not to a song:
 // an exported song carries the takes it uses (see song/library.ts).
 import { reactive } from 'vue'
+import { encodeWav } from './wav'
 import * as S from '@strudel/web'
 import { initStrudel, sampleMaps, soundNames } from './strudel'
 
@@ -94,31 +95,7 @@ async function toMonoWav(blob: Blob): Promise<{ blob: Blob; seconds: number }> {
   const live = chans.filter((_, i) => rms[i] > loud * 0.1)
   const mono = new Float32Array(buf.length)
   for (const c of live) for (let i = 0; i < mono.length; i++) mono[i] += c[i] / live.length
-  return { blob: encodeWav(mono, buf.sampleRate), seconds: buf.duration }
-}
-
-/** 16-bit PCM WAV. */
-function encodeWav(samples: Float32Array, sampleRate: number): Blob {
-  const view = new DataView(new ArrayBuffer(44 + samples.length * 2))
-  const str = (at: number, s: string) => [...s].forEach((ch, i) => view.setUint8(at + i, ch.charCodeAt(0)))
-  str(0, 'RIFF')
-  view.setUint32(4, 36 + samples.length * 2, true)
-  str(8, 'WAVE')
-  str(12, 'fmt ')
-  view.setUint32(16, 16, true)
-  view.setUint16(20, 1, true) // PCM
-  view.setUint16(22, 1, true) // mono
-  view.setUint32(24, sampleRate, true)
-  view.setUint32(28, sampleRate * 2, true)
-  view.setUint16(32, 2, true)
-  view.setUint16(34, 16, true)
-  str(36, 'data')
-  view.setUint32(40, samples.length * 2, true)
-  for (let i = 0; i < samples.length; i++) {
-    const s = Math.max(-1, Math.min(1, samples[i]))
-    view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true)
-  }
-  return new Blob([view], { type: WAV })
+  return { blob: encodeWav([mono], buf.sampleRate), seconds: buf.duration }
 }
 
 export async function saveRecording(rec: Recording) {

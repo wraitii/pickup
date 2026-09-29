@@ -33,7 +33,7 @@ Recording
 
 Songs and saving
 - Songs opens the browser's library: create a new song, open an existing song, import a Pickup JSON file, export, or delete a different song.
-- Song changes are saved in this browser. Export downloads a .pickup.json backup for sharing or restoring; it is not an audio export.
+- Song changes are saved in this browser. Export downloads a .pickup.json backup for sharing or restoring; it is an editable project backup. Use “export WAV” in Songs to download audio of the current song: full timeline, respecting mute/solo, stereo 44.1 kHz / 16-bit with a one-second effects tail. Wait for rendering to finish; it runs locally in the browser.
 - Switching songs clears the band's chat after confirmation if there is a conversation.
 
 Chat and settings

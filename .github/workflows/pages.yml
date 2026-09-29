@@ -24,7 +24,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node --experimental-strip-types --test scripts/browser-model.test.mjs
+      - run: node --experimental-strip-types --test scripts/*.test.mjs
       - uses: actions/configure-pages@v5
       - run: npm run build # type-checks (vue-tsc) then builds
         env:
