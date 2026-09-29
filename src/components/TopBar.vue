@@ -268,7 +268,7 @@ async function onImport(e: Event) {
         provider
         <select v-model="provider">
           <option value="openrouter">OpenRouter</option>
-          <option value="local">Local</option>
+          <option value="local">Local (hacky)</option>
         </select>
       </label>
       <template v-if="provider === 'openrouter'">
