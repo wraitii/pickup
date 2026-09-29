@@ -9,8 +9,8 @@ import { recorder, recordings, startRecording, stopRecording, saveRecording, rec
 import { chat, transcript, bandModelOptions, resetChat } from '../agent/agent'
 import { failedSampleMaps } from '../music/strudel'
 
-/** Set by the Pages workflow; unset in dev. */
-const sourceUrl = import.meta.env.VITE_SOURCE_URL as string | undefined
+/** The Pages workflow points forks to their own source repository. */
+const sourceUrl = import.meta.env.VITE_SOURCE_URL || 'https://github.com/wraitii/pickup'
 const logoUrl = `${import.meta.env.BASE_URL}favicon.svg`
 const header = ref<HTMLElement>()
 const showAbout = ref(false)
@@ -209,6 +209,7 @@ async function onImport(e: Event) {
       <h2 id="about-heading">About Pickup</h2>
       <p>A place to make music with an AI band.</p>
       <p>Built by <a href="https://github.com/wraitii" target="_blank" rel="noopener noreferrer">wraitii</a>.</p>
+      <p><a :href="sourceUrl" target="_blank" rel="noopener noreferrer">Pickup on GitHub</a> — source code and issues.</p>
       <p>
         Pickup reuses <a href="https://strudel.cc" target="_blank" rel="noopener noreferrer">Strudel</a>
         for live coding music and playing your patterns.
@@ -222,7 +223,6 @@ async function onImport(e: Event) {
       <p class="muted">
         Free software under the
         <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">AGPL-3.0</a>
-        <template v-if="sourceUrl"> · <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">source code</a></template>
       </p>
     </section>
 
