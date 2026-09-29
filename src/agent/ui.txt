@@ -1,0 +1,53 @@
+Pickup UI guide
+
+Layout
+- Top bar: Pickup vinyl logo, play/stop, rec, song title, bpm, loop status, AI context/cost, songs, settings, about.
+- Left: clip library grouped by section above the timeline, with the selected clip's code editor below. Drag the horizontal divider to resize the editor.
+- Right: chat with the AI band. You can ask for music changes or help using Pickup.
+
+Playback and arrangement
+- Click play/stop to start or stop audio. Space toggles playback when you are not typing or focused on a button/link.
+- Click the timeline ruler to set playback from that bar; double-click a timeline clip to set playback from its start. Press play if stopped.
+- Drag across the ruler to loop a range of bars.
+- Click a clip to select it and show its code. Cmd-click (Ctrl-click on other keyboards) a timeline clip to loop its bars, including other tracks. Cmd/Ctrl+Shift-click extends the current bar loop.
+- Cmd/Ctrl-click a clip in the library to loop that clip on its own.
+- While looping, continue leaves the loop and carries on through the song; when stopped, unloop clears the loop.
+- Drag a library clip onto the timeline to place it. Drag a placed clip to move it; Alt/Option-drag copies it. Clips on the same track cannot overlap; different tracks play together.
+- Click × on a timeline placement to remove it from the arrangement, keeping the clip in the library. Use a variant's “use” button to swap that placement's variant.
+- M mutes a track; S solos it. Track labels and displayed bar numbers start at 1; song.json track/at values start at 0.
+- Use −/+ to zoom the timeline, or Cmd/Ctrl-scroll.
+- Edit the title or bpm in the top bar. Tempo is global; allowed range is 30–300 bpm.
+
+Editing clips
+- Select a clip to edit its section/variant name, length (1–64 bars), descriptive note, or Strudel code.
+- Code changes are drafts until you click apply or press Cmd/Ctrl+Enter. Revert discards the draft. Invalid code is rejected and an error is shown.
+- The ↶ button restores the previous saved version of this clip (history is kept in memory). The trash button deletes a clip only after its placements have been removed from the timeline.
+- Editing a clip changes all placements of that clip. Ask the band for a new variant to keep the original.
+- The “from” link selects the clip a variant was based on.
+- Clip editing pauses while the band is working. If the band changes a clip with a pending draft, a message offers applying your draft or reverting to the band's version.
+
+Recording
+- Click rec, allow microphone access, then click the recording button again to stop. Name the take when prompted; cancel discards it.
+- A saved take becomes a rec/<name> clip using the rec_<name> sample, placed on a new track at the loop start or cursor.
+- Select its clip to preview the recorded audio or edit effects in its code. Deleting a recording requires removing placements and other clip references first; recordings can be shared across songs.
+
+Songs and saving
+- Songs opens the browser's library: create a new song, open an existing song, import a Pickup JSON file, export, or delete a different song.
+- Song changes are saved in this browser. Export downloads a .pickup.json backup for sharing or restoring; it is not an audio export.
+- Switching songs clears the band's chat after confirmation if there is a conversation.
+
+Chat and settings
+- Type in the chat at right; Enter sends, Shift+Enter adds a line. The chat stop button interrupts the AI response; playback has its own stop button in the top bar.
+- Try “How do I loop just the chorus?” or “How do I record a take?” for UI help.
+- Settings lets you enter an OpenRouter API key and choose the band model. The key is stored in this browser's localStorage. Never ask the user to paste a key into chat.
+- A local/driver model is also available for a separately configured local relay; the project README has setup instructions.
+- Settings also has reasoning effort: off, low, medium (default), or high. Higher effort can take longer and cost more. Changes apply to the next message; the selector is disabled for models without reasoning support.
+- Reset chat in settings forgets the conversation while keeping the song.
+- The top bar shows AI context tokens and accumulated chat cost. Tool details in chat can be expanded; manual song edits are shared with the band on the next message.
+- About credits wraitii (https://github.com/wraitii), Strudel, Vue, CodeMirror and Pi, with license and source links when available.
+- Click outside a top-bar drawer or press Escape to close it. The first-launch welcome offers API-key entry and “play the demo”.
+
+Limits of this guide
+- This is read-only app documentation, not a song file. It is available through read("ui.txt") and does not belong in song exports.
+- The agent receives song/transport context, not a view of the user's screen or open drawers. Explain controls using their labels; ask what the user sees if needed.
+- UI help alone does not require changing song files or playback. Do not claim to have clicked controls, changed settings, or recorded audio on the user's behalf.
